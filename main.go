@@ -80,16 +80,19 @@ func main() {
 			}
 			seen[key] = true
 
+		
+			cleanDomain := strings.TrimPrefix(strings.TrimPrefix(domain, "https://"), "http://")
+
 			if dates && p.date != "" {
 				d, err := time.Parse("20060102150405", p.date)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "failed to parse date [%s] for param [%s]\n", p.date, key)
-					fmt.Printf("https://%s/?%s=\n", domain, key)
+					fmt.Printf("https://%s/?%s=\n", cleanDomain, key)
 					continue
 				}
-				fmt.Printf("%s https://%s/?%s=\n", d.Format(time.RFC3339), domain, key)
+				fmt.Printf("%s https://%s/?%s=\n", d.Format(time.RFC3339), cleanDomain, key)
 			} else {
-				fmt.Printf("https://%s/?%s=\n", domain, key)
+				fmt.Printf("https://%s/?%s=\n", cleanDomain, key)
 			}
 		}
 	}
@@ -103,7 +106,6 @@ type paramData struct {
 
 type fetchFn func(string, bool) ([]paramData, error)
 
-// =================== Wayback ===================
 func getWaybackParams(domain string, noSubs bool) ([]paramData, error) {
 	subsWildcard := "*."
 	if noSubs {
@@ -153,7 +155,6 @@ func getWaybackParams(domain string, noSubs bool) ([]paramData, error) {
 	return out, nil
 }
 
-// =================== Common Crawl ===================
 func getCommonCrawlParams(domain string, noSubs bool) ([]paramData, error) {
 	subsWildcard := "*."
 	if noSubs {
@@ -196,7 +197,6 @@ func getCommonCrawlParams(domain string, noSubs bool) ([]paramData, error) {
 	return out, nil
 }
 
-// =================== VirusTotal ===================
 func getVirusTotalParams(domain string, noSubs bool) ([]paramData, error) {
 	out := make([]paramData, 0)
 
@@ -245,7 +245,6 @@ func getVirusTotalParams(domain string, noSubs bool) ([]paramData, error) {
 	return out, nil
 }
 
-// =================== Helper ===================
 func isSubdomain(rawUrl, domain string) bool {
 	u, err := url.Parse(rawUrl)
 	if err != nil {
