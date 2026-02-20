@@ -1,3 +1,3 @@
-module github.com/tomnomnom/waybackurls
+module github.com/amineelg99/getpara
 
 go 1.18
