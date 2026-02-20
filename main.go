@@ -27,15 +27,12 @@ func main() {
 	flag.Parse()
 
 	if flag.NArg() > 0 {
-		// fetch for a single domain
 		domains = []string{flag.Arg(0)}
 	} else {
-		// fetch for all domains from stdin
 		sc := bufio.NewScanner(os.Stdin)
 		for sc.Scan() {
 			domains = append(domains, sc.Text())
 		}
-
 		if err := sc.Err(); err != nil {
 			fmt.Fprintf(os.Stderr, "failed to read input: %s\n", err)
 		}
@@ -83,14 +80,16 @@ func main() {
 			}
 			seen[key] = true
 
-			if dates {
+			if dates && p.date != "" {
 				d, err := time.Parse("20060102150405", p.date)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "failed to parse date [%s] for param [%s]\n", p.date, key)
+					fmt.Printf("https://%s/?%s=\n", domain, key)
+					continue
 				}
-				fmt.Printf("%s %s\n", d.Format(time.RFC3339), key)
+				fmt.Printf("%s https://%s/?%s=\n", d.Format(time.RFC3339), domain, key)
 			} else {
-				fmt.Println(key)
+				fmt.Printf("https://%s/?%s=\n", domain, key)
 			}
 		}
 	}
@@ -104,7 +103,7 @@ type paramData struct {
 
 type fetchFn func(string, bool) ([]paramData, error)
 
-
+// =================== Wayback ===================
 func getWaybackParams(domain string, noSubs bool) ([]paramData, error) {
 	subsWildcard := "*."
 	if noSubs {
@@ -154,7 +153,7 @@ func getWaybackParams(domain string, noSubs bool) ([]paramData, error) {
 	return out, nil
 }
 
-
+// =================== Common Crawl ===================
 func getCommonCrawlParams(domain string, noSubs bool) ([]paramData, error) {
 	subsWildcard := "*."
 	if noSubs {
@@ -197,7 +196,7 @@ func getCommonCrawlParams(domain string, noSubs bool) ([]paramData, error) {
 	return out, nil
 }
 
-
+// =================== VirusTotal ===================
 func getVirusTotalParams(domain string, noSubs bool) ([]paramData, error) {
 	out := make([]paramData, 0)
 
